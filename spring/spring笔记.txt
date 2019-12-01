@@ -1,0 +1,161 @@
+spring通过配置文件的方式为某些属性赋值<property name="service" ref="userService"> 称为控制反转
+这个实际上是通过getXXX(T t)方法来进行操作的
+c和p的命名空间都在beans中 
+如果不在的命名空间需要导入校验文件
+spring的依赖注入 两种方式 设值注入 构造注入
+1.构造注入:
+(1)name注入:<constructor-arg name="axe" ref="">
+当在xml中直接创建一个bean时(只有id和class) 如果不做任何处理会直接使用默认构造函数 
+如果没有会报错 可以通过constructor-arg进行赋值操作 如果有多个形参可以写多个constructor来进行赋值
+(2)name方式可以没有先后顺序
+索引注入:  constructor-arg赋值需要与构造方法中的形参一一对应
+<constructor-arg index="0" ref=""> 不写index,要顺序一一对应
+(3)type注入:<constructor-arg type="com.langsin.pojo.User" ref="">
+如果有两个相同类型的形参要顺序一致
+简化配置 在bean中直接写 c:age="22"
+2.设值注入:通过<property name="age" value="22"> 需要提供getset方法
+简化配置在bean中直接写p:age="22"
+记得有一个默认构造方法
+
+spring容器创建对象的三种方式 
+1.无参构造器 2.有参构造器3.工厂方式 静态工厂 动态工厂
+静态工厂:factory-method="" c:color=""
+动态工厂factory-bean="" factory-method=""
+
+如果bean没有定义id 但是定义了name那么name就相当于bean的id
+如果既定义了id 又定义了name那么name就相当于别名 可以用空格隔开定义多个别名
+
+spring为我们提供的bean作用域有五种
+1.单例 2.多例 3.request(一次请求中单例的) 4.session 5.gloable单例
+可以通过在bean属性中设置scope进行设置bean的作用域 默认是单例
+
+集合对象值得注入 
+数组
+<property name="fruit">
+<array>
+<value>apple</value>如果基本类型写value引用类型写ref
+<value>banana</value>
+</array>
+</property>
+集合list:
+<property name="fruit">
+<list>
+<value>apple</value>如果基本类型写value引用类型写ref
+<value>banana</value>
+</list>
+</property>
+集合set
+<property name="fruit">
+<set>
+<value>apple</value>如果基本类型写value引用类型写ref
+<value>banana</value>
+</set>
+</property>
+集合map
+<property name="fruit">
+<map>
+<entry key="" value-ref=""></entry>
+<entry key=""><value>牟燕</value></entry>
+</map>
+</property>
+简化配置 util 在这个命名空间下数组和list都是list
+
+spring的自动装配<bean id class autowire="">常用byName 因为多态
+定义成全局的自动注入 放在beans结尾中 default-autowire=""
+
+通过注解的方式自动扫描包引入 需要context命名空间
+<context:componet-scan base-package="com.langsin.injection">
+注解 @Component 标注一个普通的java bean  不常用
+@Controller 标注一个控制器组件类  常用
+@Service 标注一个业务逻辑组件类   常用
+@Repository 标注一个Dao组件类  不常用
+用注解时可以把default-autowire=""去掉
+但是需要对进行注入的变量要用注解标识@Autowired
+通过配置的方式default-autowire需要有set方法 但是通过注解的方式@Autowired可以不需要set方法
+
+如果需要java或者其他第三方提供的class文件需要在xml中配置需要的bean
+在需要用到的地方通过@Autowired进行自动装配
+
+spring声明式事物的管理类
+<bean id="txManager" class=org.springframework.jdbc.datasource.DataSourceTransactionManager
+p:dataSource="dataSource" 
+并需要给属性值dataSource传递参数赋值
+通过消息通知的方式来开启声明式事物 引入tx命名空间
+配置消息通知 比较麻烦并且也不需要 省略一些 这个是不全的 具体请自行查阅资料
+<tx:advice id="advice" transaction-manager="txManager">
+如何将消息通知加到service中 需要用到aop切面编程 引入aop命名空间
+aop切面编程
+poitcut是切入点表达式
+<aop:config>                       代表所有返回值的 所有这个包下的所有子类所有方法 ..表示有无参数都可以
+<aop:advisor advice-ref="advice" pointcut="execution(* com.langsin.service.*.*(..))">
+<aop:config/>
+
+通过注解的方式配置事务  可以把<tx:advice>去掉 <aop:config>去掉
+在<context:component-scan  base-package="com.alngsin.ss
+				         com.langisn.aa
+">
+之后加入<tx:annotation-driver transaction-manager="txManager">
+
+aop切面编程使用aspect框架
+<aop:config>
+<aop:point expression="execution(* com.langsin.aop.Hourse.*(..))" id="pointcut">
+<aop:aspect ref="某个bean的id">
+<aop:before method="上面class类中的某个方法" pointcut-ref="pointcut"/>
+<aop:after method="上面class类中的某个方法" pointcut-ref="pointcut"/>
+</aop:aspect>
+<aop:config/>
+如果对方法进行环绕处理需要借助ProceedingJoinPoint类
+加入的额外方法传入参数ProcessedingJoinPoint joinPoint 
+并且如果要执行目标方法必须joinPoint.proceed(); 如果不写就会不执行目标方法
+环绕前的方法卸载joinPoint.proceed()之前 环绕后的方法写在joinPoint.proceed();之后
+并且可以改变执行方法返回值
+
+基于注解方式的aspect增强
+<aop:aspectj-autoproxy/>
+并且在<context:component-scan base-package="">
+<context:include-filter type="annotation" expression="org.aspectj.lang.annotation.Aspect"/>
+</context:component-scan>
+
+在进行的增强类里面用注解标识
+类用@Aspect标识
+方法用@Before("execution (* com.langsin.aop.Hourse.*(..))") 
+@After("execution (* com.langsin.aop.Hourse.*(..))")
+@Around("execution (* com.langsin.aop.Hourse.*(..))")
+也可以在这个类中定义一个全局的切面表达式在某个方法上
+@Pointcut(value="execution (* com.langsin.aop.Hourse.*(..))")
+public void pointCut(){}   
+当需要用时引用就可以例如:@Before("pointCut()") 里面传递的参数就是方法名称记得加括号因为是方法
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

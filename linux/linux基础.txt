@@ -1,0 +1,308 @@
+查看当前所在目录 pwd
+
+罗列当前文件目录下的文件 ls
+
+解压缩命令 扔到临时目录  tar -xvf 文件名.gz -C /tmp/
+
+进入某个文件 cd
+
+执行pl 批处理文件 ./文件名.pl
+
+man命令  查看某个命令的具体提示例如 man shutdown
+man page 
+1 用户在shell环境中可以操作命令
+2 系统内核(kernel)可以调用的函数与工具
+3 常用的函数与函数库
+4 设备配置文件 dev下面的文件
+5 配置文件的格式问题
+6 games有关系
+7 记录linux网络协议与文件系统
+8 系统管理员可以用的命令
+9 跟内核有关系的文件
+
+查找想要的词汇高亮显示  /某个词汇 
+小写n 往下找查出来的词汇 大写N 往上找
+
+q退出
+w保存
+
+查看某个命令的帮助 和man差不多
+某个命令 --help 比man简洁
+
+把shell环境改成英文 LANG=c
+
+linux提供了6个纯文本终端 ctrl+Alt+F1-F6;退出是exit
+还有一个图形类型的界面 ctrl+Alt+F7;
+
+who命令 查看谁登陆了 
+
+我们登陆为什么直接进入图形界面而不是文本界面
+是因为etc/inittab里的配置所设置的 5 是图形界面
+
+vim编辑器  #代表注释
+进入某个文件 例如:vim /etc/inittab
+退出文本编辑 先按Esc 然后:q 退出
+
+图形文本编辑器 相当于记事本 gedit 某个文件(某个不存在的文件也可以不存在即创建)
+gedit只能在图形界面终端打开
+
+查看当前运行的进程的进程id号
+ps -ef | grep gedit(进程的名称)
+然后杀掉进程 kill 进程id号
+kill -9 进程号 比较暴力杀死
+
+查看ssh服务状态
+/etc/init.d/sshd status/start/stop/restart等命令
+service sshd status
+
+linux的命令格式 command [-option] para1 para1 para1
+如果不想把空格解析为另一个参数 用' '包裹空格
+举例date +%Y/%m/%d' '%H:%M 
+
+cal 日历命令
+cal 2008  (2008年的日历 )
+cal 4 2008 (2008年的五月份)
+
+
+linux中一切皆是目录
+ls -l 命令  查看一个目录下的所有文件 可以查看权限
+linux没有后缀名这么一说
+
+更改文件名 mv 1.txt 2.txt  
+mv是移动的意思 将1.txt的内容转移到2.txt中
+
+cd .. 是进入到当前文件的上一级目录
+. 是当前目录
+
+文件拷贝cp 
+cp 某个路径下的某个文件夹  复制到哪个的目录
+
+删除文件
+rm 删除某个目录下的某个文件 会提示你是否确认删除 
+如果要忽略提示 rm 某个目录下的文件名 -f 或者  rm -f 某个目录下的文件名 
+
+删除文件夹及其文件夹里的文件 递归删除
+rm -r  
+
+创建文件夹 mkdir 文件夹名称
+
+创建文件 touch 文件名称
+
+删除文件夹且不提示  危险命令  
+rm-rf
+
+与用户有关的简单命令:
+
+查看是否存在这个用户 :id 用户名称   
+
+添加用户 :useradd 用户名称  
+设置用户密码 passwd 用户名称
+root用户权限最大 多长的密码都可以设置成功
+
+切换用户 su - test1
+
+用户#代表超级管理员  
+用户$代表普通用户
+在超级管理员状态下切换用户 不需要密码
+超级管理员切换成普通用户再切换回来也可以在普通用户界面exit退出 
+其他用户切换成超级管理员需要密码 
+
+终止命名 
+ctrl+c 终止命令
+ctrl+d 终止键盘指令 相当于exit 
+
+命令补齐/文件补齐
+tab
+输入一个命令例如user + 两下tab键 就会提示所有以user开头的所有命令
+输入一个文件名的开头+tab 会自动补齐文件名 如果有多个前缀重复的再按一下tab 
+会提示所有的以你输入的前缀为开头的文件
+
+关机命令 shutdown  具体看man page页
+shutdown -h now
+shutdown -h 23:00   23点关机
+shutdown -h +60     60分钟后关机
+shutdown -k now 'system will reboot after ...second'  不是真正的关机而是将信息发布到所有登陆的用户
+
+重启命令 reboot 
+
+halt 也是关机 直接进行硬件关机
+
+sync 同步 强制将内存中的数据写回硬盘中
+
+!$代表上一次命令的最后一个部分
+
+打开图形界面-网络配置
+system-config-network
+
+网络配置文件
+/etc/sysconfig/network-scripts/ifcfg-eth0
+
+打开配置文件DNS配置
+vim /etc/resolv.conf
+
+
+默认网关地址写Windows的路由地址
+
+
+DNS写202.96.209.5 或者其他可用的DNS
+
+
+网络服务
+/etc/init.d/network {restart/status/starts}
+
+linux安装软件包
+在我们的DVD镜像server中有大量的安装包 安装包是rmp结尾的
+
+如何安装rmp文件
+rmp -ivh 安装包的名称.rmp
+
+查看磁盘信息 fdisk -l
+
+挂载u盘 mount /dev/sdb1 某个目录(全路径)
+然后进入这个目录
+卸载U盘 umount 挂载目录全路径
+如果目录里有文件U盘挂载之后之前的文件就看不到了
+卸载U盘目录之后文件就重新可见了
+
+
+在usr/share/vim/vim70/tutor/tutor.zh.euc文件下有vim命令的具体学习文档
+vim读取出现乱码 可以用gedit打开 然后另存为utf8格式的文件 vim再重新打开就不乱码了
+vim编辑器操作命令
+vim有三种操作模式
+一般模式:刚打开之后
+
+编辑模式:
+i:在当前光标的前面位置进行插入
+      
+或o:相当于enter新插入一行进行编辑    
+
+或a :在当前光标的后面编辑
+
+按esc返回一般模式
+在一般模式下按dd 删除当前行
+在一般模式下按u  撤销
+在一般模式下按yy 是复制当前行
+在一般模式下按p 在当前行粘贴
+在一般模式下按yny 是复制从当前一直数n行
+在一般模式下按dw 删除一个词 
+在一般模式下按yw 复制一个词 
+在一般模式下按shift+$ 移动到当前光标所在行的最后 
+在一般模式下按shift+^ 移动到当前行首部 
+在一般模式下按G 移动到最后一行
+在一般模式下按1+G 移动到第一行
+在一般模式下按n+G 移动到第n行 
+在一般模式下按d+G 删除光标当前行下面的所有行 
+在一般模式下按d+10+d 删除光标当前行下面10行 
+
+
+
+
+命令行模式
+在一般模式下按:或者/或者?进入命令行模式
+
+按:进入命令行
+:w 保存 
+:q 退出
+:wq 保存退出
+:q!   退出不保存
+:set nu 显示行号
+:set nonu 不显示行号
+:set all 你可以做的所有操作
+:%s/old/new/g  替换/g代表全部替换 不加/g也替换全部
+:e! 重新读入  如果保存就保存读入的文件
+
+在一般模式下按/进入命令行 用来查找
+/hello 查找hello   n往下找 N往上找
+/某个单词 正查
+
+在一般模式下按?  
+?某个单词  也是查找反查 n查找上一个 N查找下一个
+
+
+运行程序独立运行nohup不依赖终端 
+在后台运行 在程序后面+&
+举例:nohup gedit tutor.zh.euc &
+在后台运行gedit并且不依赖与终端
+
+如果用鼠标复制粘贴 必须在编辑模式下才可以进行粘贴
+如果复制的是以i开头的 当粘贴的时候i被作为命令使用粘贴过后会少一个i
+
+如果vim编辑过程中vim强制kill vim那么会在当前目录下保存一个.swap文件
+当再次打开会提示一些操作 如果删除.swap文件 就不会保存之前强制关闭进程时做的操作
+
+vim ./viminfo下会保存你操作的终端命令
+
+安装gcc
+sudo apt-get install build-essential
+
+sudo 命令 
+越权行为 短暂的利用超级管理员权限
+
+make 编译并安装  两个操作
+ 
+./src/redis-cli -a 密码 shutdown 关闭redi
+./src/redis-cli shutdown 关闭redis
+src/redis-server redis.conf 开启服务
+
+./src/redis-cli 连接默认
+./src/redis-cli -p 6379 连接redis指定端口
+
+多请求的和并请求 多个命令合并成一个命令 提高并发度
+
+redis 命令
+
+get
+
+set    更新行为,set设置的只能是字符串 ' '可以包裹空格不是纯粹的创建行为 可以理解为更新
+
+setnx 创建行为,不会覆盖,set和exists二合一  如果不存在设置  不存在设置 不会替换
+
+del 删除key
+
+expire 设置过期时间  expire hello 40  设置40秒后过期 
+
+persist key 取消过期行为 
+
+ttl hello 查询key还剩多少秒过期
+
+setex hello 20 'world' 设置和过期合二为一
+
+decrby 减去一个count value必须是integer类型
+
+dbsize key的数量
+
+info memory 查看当前实例的内存情况
+
+碎片 1-1.15 健康状况 存储太少也会不正常
+
+
+value应该存到100k以内
+一个实例 key可以存储2的32次方个(理论)  实际2.5亿个key  
+
+Hvals 只列举hashmap 数据
+
+
+
+usr/redis-5.0.5/cluster-conf
+
+
+mini:192.168.0.122
+mini2:192.168.0.54
+mini3:192.168.0.55
+
+开启redis指定端口号:src/redis-server cluster-conf/7001/redis.conf & 
+
+以集群化模式连接redis指定端口号-c表示集群化模式连接服务器:src/redis-cli -c -p 7001 
+cluster nodes 查看集群化配置
+
+以集群化模式进行访问 才能进行插入 因为 写只能是主节点 并且是经过计算分配插槽 
+ 
+不以集群化模 式连接redis指定端口号:src/redis-cli -p 7001
+关机:src/redis-cli -p 7001 shutdown
+
+
+
+创建集群命令:src/redis-cli --cluster create --cluster-replicas 1 192.168.0.122:7001 192.168.0.54:7001 192.168.0.55:7001 192.168.0.122:7002 192.168.0.54:7002 192.168.0.55:7002
+
+
+
