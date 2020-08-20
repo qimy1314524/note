@@ -1,0 +1,52 @@
+ss -anll |grep 端口
+umount /dev/sdc1
+ll -h 文件大小
+md5sum 文件名  md5校验
+mkdir -p 文件  递归创建文件夹
+fdisk -l  罗列挂载的文件
+mount /dev/sdc1 /mnt/u
+uzip  文件.zip  解压
+ip a
+ethtool 网卡名称  查看网卡信息
+ethtool -p 网卡名称   服务器相对应的网卡接口就会 亮灯
+du -hd 0  文件大小
+
+磁盘分区
+/Boot 500mb
+/swap 16Gb
+/home 1024GB
+/ 最大  接收更改
+
+du -hd 0 统计当前文件夹多大
+
+1.安装软件
+
+yum install 软件名称
+
+2.卸载软件
+
+yum remove 软件名称
+
+3.更新软件
+
+yum update 软件名称
+
+4.列出所有可安装的软件包
+
+yum list
+
+5.列出所有可更新的软件包
+
+yum list updates
+
+6.列出所有已安装的软件包
+
+yum list installed
+
+7.列出所有可更新的软件包信息
+
+yum info updates
+
+8.列出所有已安裝的软件包信息
+
+yum info installed

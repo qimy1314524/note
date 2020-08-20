@@ -1,0 +1,138 @@
+
+
+
+mybatis框架
+首先配置sqlMapConfig.xml 然后配置log4j.xml 
+sql语句写在*.xml中  mapper 有一个命名空间  一个xml只能写一个mapper空间 
+命名冲突时使用resultMap进行命名的转换
+<reslutMap  <id column="" properties=""/>  <result column="" properties=""/></result>
+
+插入操作时如果主键是自增长那么如何得到主键 
+在insert语句中插入如下语句
+<insert id....>
+<selectKey keyProperties="userId" order="AFTER" reslutType="int">
+select last_insert_id();
+</selectKey>
+注意如果是uuid作为主键插入 select uuid() order那就是before
+insert into user()values()
+</insert>
+<insert id="insertUser2" parameterType="com.langsin.pojo.User2" >
+		<selectKey  keyProperty="userId" order="BEFORE" resultType="String">
+		select uuid()
+		</selectKey>
+		insert into user2 values(#{userId},#{userName},#{roleId},#{userPass},#{cname},null)
+		</insert>
+
+批量加载放在setting后面
+<typeAliases>
+<package name="aom.langsin.pojo"> 当写名称的时候首字母小写 其他都一样
+</typeAliases>
+
+寻找xml
+<mappers>
+<package name="com.langsin.mapper">
+</mapeers>
+
+如果传递hashmap 普通类型直接#{名称如:cname}
+如果hashmap的value值是一个javabean类型 写#{例如:user.cname}
+
+动态sql
+<select id="queryDynamic" parameterType="hashMap" resultType="hashMap">
+		select user.*,product.* from user 
+		join product on user.user_id=product.id
+		<where>
+		<if test="pName!=null and pName!=''">
+		and product.p_name like #{pName}
+		</if>
+		<if test="userName!=null and userName!=''">
+		and user.user_name like #{userName}
+		</if>
+		<if test="cname!=null and cname!=''">
+		and user.cname like #{cname}
+		</if>
+		</where>
+		</select>
+
+
+可以定义sql片段 <sql>  引用的时候 <include refid=""></include>
+
+foreach遍历循环删除
+<delete id="deleteByIds" parameterType="map">
+		delete from user2 where user_id in
+		<foreach collection="userIds" item="userId" open="(" separator="," close=")">
+		#{userId}
+		</foreach>
+</delete>
+
+
+当进行一对一或者一对多多对多关联映射时 返回结果集用resultMap
+一对一不管列名是否一致都要写否则取不到
+<resultMap>
+<id><result>
+<association property="在bean中的变量名称" javaType="javabean类名称">
+这里用的是javaType
+
+
+一对多
+<resultMap>
+<id><result>
+<collection property="在JavaBean中的变量名称" oftype="JavaBean类名"> 
+因为一对多 所以查询出一个用户多个订单 所以订单要用collection 要用ofType
+
+
+
+多对多
+即一对多和多对多联合嵌套使用
+
+
+mybatis延迟加载 开启延迟加载 然后关闭积极加载  延迟加载的好处 用不到的副查询不会查询 如果需要会再次进行查询
+<resultMap type="user_orders" id="lazyQuery">
+		<id column="user_id" property="userId"/>
+		<result column="user_name" property="userName"/>
+		<result column="role_id" property="roleId"/>
+		<result column="user_pass" property="userPass"/>
+		<result column="cname" property="cname"/>
+		<collection property="orders" ofType="orders" select="queryLazyOrderById" column="user_id"> //一对一是association一对多是collection
+		//组合查询 select是另一个查询的id column是用来连接查询的列 collection里面不需要再做什么id 或者 result定义
+		</collection>
+		</resultMap>
+		
+		<select id="queryLazyUserById" parameterType="int" resultMap="lazyQuery">主查询的返回类型必须是resultMap 
+		select * from user where user_id=#{value}
+		</select>
+		<select id="queryLazyOrderById" parameterType="int" resultType="orders">副查询的返回类型可以使任意类型 resultMap 或者resultType都可以
+		select * from orders where userId=#{value}
+		</select>
+
+事务的四个特性
+原子性 隔离性 一致性 持久性
+
+mybatis查询缓存  分为一级缓存和二级缓存
+一级缓存是针对一个用户的sqlSession级别的  
+当进行查询的时候会往一级缓存区域写入数据 当进行增删改的时候会清除一级缓存
+一级缓存是默认开启的
+
+
+二级缓存是针对整个应用的mapper级别的
+当我们用到分布式部署的时候需要用到缓存框架 ehcache
+当使用二级缓存的时候我们的javabean必须实现序列化 因为会在多个服务器之间进行传输
+开启mybatis的默认二级缓存 在*Mapper.xml中配置标签<cache/>
+缓存命中率
+只要有一个sqlSession提交commit即增删改 就会清除缓存
+经常做更新的Mapper.xml不适合使用二级缓存
+ehcache和mybatis整合
+<cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+type不写时候默认使用mybatis自己的
+使用ehcache还需要配置一个ehcache.xml文件
+<?xml version="1.0" encoding="utf-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNameSpaceSchemalLocation="./ehcache.xsd">
+	<diskStore path="E:/temp"/>
+	<defaultCache maxElementsInMemory="10000" eternal="false"
+	timeToIdleSeconds="120"
+	maxElementsOnDisk="100000000" diskExpiryThreadIntervalSeconds="120"
+	memoryStoreEvictionPolicy="LRU"/>
+	<cache name="user" maxElementsInMemory="2000" eternal="false"
+	timeToIdleSeconds="200"
+	timeToLiveSeconds="600" overflowToDisk="true"/>
+	</ehcache>

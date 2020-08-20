@@ -1,0 +1,69 @@
+
+磁盘阵列
+raid0 raid01 raid10 raid5
+
+
+raw device 裸设备   asm 只能能存储一个 速度最快
+
+
+tomcat 中间件  weblogic websphere jboss
+集群??? loadbalance
+
+
+lvs 多个自己处理   
+
+volatile 两个功能 
+ 多线程环境下代码顺序的强制保证  
+ 一个线程对一个全局变量的修改行为对另外的线程是可见的,前提对变量的修改必须用到这个值
++1不是,不需要用到原来的值
+
+类加载器
+hashmap的扩容机制
+hash冲突  重新进行hash运算  链表
+
+java算法  红黑树
+
+数据库索引
+
+
+桶排序
+
+DNS
+
+grep
+
+逃逸分析:没有构造完成的对象 future原理
+
+静态化 jsp-->html                                                             
+
+how tomcat works  书
+
+HA  hight available 
+
+LB  heartbeet
+
+TOS	QOS
+ 
+技术 关系
+
+通信
+
+javaNio 书  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   

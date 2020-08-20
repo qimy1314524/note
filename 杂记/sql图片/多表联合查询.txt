@@ -1,0 +1,103 @@
+#====Mysql第四天=====
+#多表联合查询  92规范
+两个表的关联查询：查询学生及该学生所对应的教师信息
+select s.id,s.sname,s.age,t.name,t.subject 
+from student s,teacher t where s.teacher_id=t.teacher_id
+and s.id='ST000003'
+三个表的关联查询，查询用户及该用户的订单，以及订单所购买的具体的商品信息
+select  u.user_id,user_name,u.cname,o.number,o.order_date,od.item_id,od.buy_num
+from user u,order o,orderdetail od where
+u.user_id=o.user_id and o.order_id =od.order_id and u.user_id='000010'
+
+广义笛卡尔积：select s.*,t.* from student s,teacher t
+数据的组合会用到 开发一般用不到
+
+#=======使用99规范进行等值连接查询
+99规范 可读性更强，查询的多个数据使用XXX join 连接 
+举例：select s.*,teacher_name from student_table s cross join teacher_table t;
+主表为学生表
+select s.id,s.name,s.age,t.name,t.subject from student s
+join teacher t on s.teacher_id=t.teacher_id
+where s.id='ST000003'//主表放在from后面，关联表放在join后面
+主表为老师表：
+select s.id,s.sname,s.age,t.name,t.subject from teacher t
+join student s on t.teacher_id=s.teacher_id//on 后面关联条件
+where t.teacher_id='ST0001'// where 后面加过滤条件
+
+交叉连接：交叉连接无须任何连接条件
+举例;select s.*,teacher_name from student_table s cross teacher_table t
+
+#=========补充view视图技术======
+把复杂的SQl语句变得简单
+视图看上去像是一个数据表，但他不是数据表，因为它并不能存储数据，视图只是一个或
+多个数据表中数据的逻辑显示，使用视图好处：
+1.可以限制对数据的访问     3.提供了数据的独立性
+2.可以使复杂的查询变得简单  4.提供了对相同数据的不同显示
+35
+create or replace view tea_student as//如果没有创建，有替换
+select s.id,s.sname,s.age,t.name,t.subject from teacher t
+join student s on t.teacher_id=s.teacher_id//on 后面关联条件
+where t.teacher_id='ST0001 
+直接查询视图
+select *from tea_student;
+也可以当做表来操作
+select *from tea_student where id='ST000003'
+删除视图：
+drop view 视图名
+
+#==========子查询
+子查询就是指在查询语句中嵌套另一个查询语句，子查询也可以支持多层嵌套，
+对于一个普通的查询语句子查询可以出现在两个位置
+1.出现在from 后面当做数据表，这种做法被称为行内视图，因为该子查询实质是一个临时的视图
+2.出现在where条件后作为过滤条件的指
+（）优先执行
+#查询用户的购买的商品的信息
+select *from product where item_id in (
+select od.item_id
+from user u,order o,orderdetail od where
+u.user_id=o.user_id and o.order_id =od.order_id  where u.user_id='000010'
+)
+
+#-=======存储过程
+
+简单来说就是为以后的使用而保存的一条或多条MYSQL语句的集合。可将其视为批处理文件
+虽然作用不仅限于批处理
+//创建存储过程
+drop procedure if exists user_item_list;
+delimiter//
+creat procedure user_item_list(in sname varchar(30),
+in id varchar(40),in mun count)
+begin
+#查询要购买的商品的总量
+set @total=(select p_store from product where id=p_id);
+set @pcode=(select p_code from product where id=p_id);
+set @pname=(select p_name from product where id=p_id);
+update product set p_store=(@total-num) where id=p_id;
+insert into userlist values(null,@pcode,@oname,num,null,sname)
+end//
+#========调用存储过程执行语法
+call user_item_list('zhaoyun','1214544s44sf5a44as4',2);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

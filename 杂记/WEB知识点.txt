@@ -1,0 +1,202 @@
+项目部署到tomcat上
+1给某个主机配置:<context docBase="真实路径" path="虚拟路径">
+2.在主机下面配置xml文件<context docBase="真实路径"> xml文件的名称为项目的虚拟路径
+/conf/catalina下的主机文件
+3.直接把web资源放进webapps下 一般放war文件 打包jar -cvf uuu.war *(*代表打包所有)
+4.直接使用tomcat配置
+
+配置自己的虚拟主机:
+serve.xml中加入host标签 修改host标签的appbase=一个tomcat中新建文件夹
+naem="www.tey.com" 修改端口 修改host文件
+
+<init-param>
+<param-name></param-name>
+<param-value></param-value>
+<init-param>
+servletconfig代表自己的配置信息
+在servlet中获取:ServletConfig cof=this.getServletConfig(); cof.getInitParameter("encoding");
+
+<context-param>
+<param-name></param-name>
+<param-value></param-value>
+<context-param>
+servletcontext 叫做application 代表整个web应用也代表整个xml
+servletContext是一个域对象 作用范围是整个web应用,包括servlet和jsp四大作用域中最大的一个
+通过get/set/remove获取设置删除作用域里的参数
+
+注解@webservlet(urlPatterns(或者values代表路径)="/cs",loadOnStartup=1)
+
+设置响应头 response.setHead("Context-type","text/html;charset=utf-8");
+
+form表单action="/first/aservlet" /代表虚拟主机
+乱码解决方案:
+request.setCharacterEncoding("utf-8");
+response.setCharacterEncoding("utf-8")
+response.setContentType("text/html;charset=utf-8");
+
+获取请求头信息 req.getHeaderNames();
+
+request.getParamter("名称")根据指定名获取指定参数
+
+请求转发页面这里的/代表本web应用 webContent
+request.getRequestDispatcher("/success.html").forword(request,response);
+转发到动态资源 服务器内部行为  地址栏观察不到
+request.getRequestDispatcher("/bservlet").forword(request,response);
+
+在javaweb中后台有三个域对象 application(servletContext) request(自用户发来请求到结束) session
+javaweb前台jsp中有四个域对象加上page域
+
+设置参数 request.setAttribuye("key","value")
+
+重定向:在地址栏可以看到变化/代表主机www.tey.com
+两次请求两次响应 wen浏览器行为
+不能使用请求域来传递属性
+登陆成功用重定向
+request.getContextPath();获得上下文路径 项目名称
+response.sendRedirect("request.getContextPath()+"/success.html");
+两次不同的请求不能用request.getAttribute();
+
+刷新头
+response.setContentType("text/html;charset=utf-8")
+response.setHeader("refresh","3;url="+request.getContextPath()+"/img/54.jpg");
+
+自用户打开浏览器与一个web应用建立第一次请求和响应后所有的请求和响应都属于本次会话范围
+获取session request.getSession(); session.set/get
+浏览器关闭自动session关闭  30分钟不响应超时
+session.setMaxInactiveInterval(10); 最大不响应时间 10s后session关闭
+session.invalidate();直接杀session  登录时把信息加入session是用户注销的时候用
+session钝化和活化 默认出现在work目录里 实现了serializable才能被序列化
+活化30分钟内重新启动服务器
+
+jsp javaserve page java技术动态生成网页的技术 本质就是servlet
+通过response对象获取writer写HTML标签
+jsp七个部分组成  
+html/jsp编译指令/jsp注释/jsp脚本/jsp声明/jsp表达式/jsp动作指令
+jsp运行过程  
+el/jstl标签
+<%--  	--%>jsp注释翻译成java是丢弃
+<% %>jsp脚本 可以在里面写java代码 这样做不和乎oop想法
+<%@	%>jsp编译指令
+<%= 	%>相当于输出指令
+<%@page  import="java.util.Date"%>jsp编译指令
+<% include file="jsp2.jsp"%>包含指令没有被编译成java
+
+错误页面 必须配置 isErrorPage="true"
+
+局部错误页面
+在page指令中配置errorPage="error.jsp" 出现错误后会找这个jsp文件
+
+配置全局错误页面:
+<error-page>
+	<error-code>404</error-code>
+	<location>/error404.jsp</location>
+</error-page>
+输出错误信息
+<%=exception.getMessage()%>
+
+jsp动作指令 <jsp:include page="jsp2.jsp"></jsp:include> 会被编译
+<jsp:forword page="jsp2.jsp"></jsp:forword>
+声明成员变量和方法
+jsp声明:<%! int a=10 ;%>在service外面
+
+jsp九大内置对象:
+page:当前页面 jsp编译后的servlet类对象 相当于this
+config:相当于servletconfig
+application:代表servletContext表示整个应用
+requeest:请求对象
+response:响应对象不是重点
+session:表示一次会话
+out:输出
+exception:异常
+pageContext:页面上下文 这一个对象可以获得其他 八大对象
+还可以从四大作用域里面搜寻属性
+
+四大作用域
+页面域 pageContext  简称page   当前页面 仅在页面有用
+请求域 httpserveRequest request 一次请求
+会话域 httpsession  session  用户浏览器
+应用域  ServletContext application 项目部署到移除
+
+el表达式替代jsp表达式,可以做普通的运算可以做普通的判断 可以获取域中的属性 
+有11个内置对象:11内置对象
+pageScope  requestScope sessionScope applicationScope代表四大作用域里的属性的集合
+pageContext 表示的是JSP中内置对象pageContext,能获取request等其他JSP八大内置对象　
+param 请求参数 等效于request.getParameter("user");
+paramValues 表示一组请求参数 等效request.getParameterValues("")
+header  表示请求头 相当于request.getHeader("refere")
+headerValues 一组头信息
+cookie
+initParam  xml里面配置的初始化参数
+${param.username} 没有的信息不报错也不显示
+请求域中的user属性${requestScope.user}
+查找四大作用域中的user从小到大找 ${user}
+查找四大作用域中的user里的username从小到大找 ${user.username}
+做判断:${1=9}
+${not empty user}
+
+
+jstl标签库
+引标签库<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+for循环:
+<c:forEach begin="1" end="10" step="1">
+${user.username}====${user.password}
+</c:forEach>
+form表单action可以用action="${pageContext.request.contextPath}/login"
+增强for循环 遍历list
+<c:forEach items="${lus}" var="u" varstatus="s">
+	${s.index+1}
+	${u.username}
+	${u.password}
+</c:forEach>
+增强for循环 遍历Map
+<c:forEach items="${lus}" var="u" varstatus="s">
+	${s.index+1}
+	${u.key.usernaem}
+	${u.value.password}
+</c:forEach>
+
+奇数偶数颜色不同效果
+$("table tr:even").addClass("success");
+$("table tr:odd").addClass("warning");
+
+jstl if标签
+if else
+<c:if test="${us==null}">
+<h1>hello<h1>
+</c:if>
+<c:if test="${us!=null}">
+<h1>bad<h1>
+</c:if>
+多重if else
+记住带单引号  不写单引号会认为是属性 回去属性域里去找
+<c:choose>
+	<c:when test=${us.username=='admin'}>
+		admin你好
+	</c:when>
+	<c:when test=${us.username=='学生'}>
+		同学你好
+	</c:when>
+	<c:otherwise>
+		回家学习
+	</c:otherwise>
+</c:choose>
+
+<c:set>保存数据的
+<c:out> 输出数据相当于jsp中的<%=	%>
+自己看文档
+
+fn标签 引入<%@taglib uri="http://java.sun.com.jsp/jstl/functions" prefix="fn">
+fn标签用在jstl表达式里  偶尔用到
+<c:if test="${fn:endsWith(us,'jsp')}">
+
+监听器:
+
+退出系统时给个缓冲 
+response.getWriter().write("用户退出系统成功,2s后回到登录页面")
+response.addHeader("refresh","2;url="+request.getContextPath()+"/login.jsp")
+
+
+
+
+
+

@@ -1,0 +1,88 @@
+volatile
+	对变量的修改是可见的 前提是不依赖原本的变量 比如i++,i+=1都不行
+	防止指令重排序,即保证代码顺序执行 
+synchronized 等各种锁在jmm(java memory model)中会加入一个虚拟机字节码指令lock
+这个锁lock 可以把工作内存中的变量同步到主内存
+
+
+当两个线程轮询打印的时候
+Condition通知具体唤醒哪一个线程，从而完成了多个线程之间的调度。
+reentrantlock lock=new reentrantLock();
+Condition con1=lock.newCondition();
+Condition con2=lock.newCondition();
+con1.await();
+con2.signal();
+con2.await();
+con1.signal();
+
+ConcurrentHashMap
+CopyOnWriterArrrayList
+ArrayBlockQueue()
+
+看oracle数据库的书
+
+<sql cookbook> 书
+
+类加载器  自上往下使用加载器加载  找到就加载 找不到向下找 再找不到报错
+BootStrapClassLoader  首先用这个加载  加载jdk提供的类
+ExtClassLoader    加载jdk提供的类 	加载jre\lib\ext里面的jar包
+AppClassLoader  加载自己写的类	加载我们自己写的类
+方法区:保存类的元结构
+
+
+
+lockSupport.park();线程挂起 
+locakSupper.unpark();线程唤醒 
+
+locl 将本地内存刷回主内存
+主内存 本地内存
+
+悲观锁
+乐观锁 共享锁 
+重入锁 reentrantLock  synchronized都是重入锁 允许加锁的同时在进行加锁
+	重入锁，也叫做递归锁，指的是同一线程 外层函数获得锁之后 ，内层递归函数仍然有获取该锁的代码，
+	       但不受影响。synchronized 和 ReentrantLockd都是重入锁
+
+ABA问题 只有cas情况下会出现 因为CAS是无锁的  compareAndSwap
+解决方案:AtomicStampedReference atomicStampedRef=new :AtomicStampedReference();
+atomicStampedRef.compareAndSet(100, 101, atomicStampedRef.getStamp(), atomicStampedRef.getStamp() + 1);
+
+无锁的情况 会等待进入阻塞
+
+上锁的情况
+AQS  AbstractQueuedSynchronizer 里面维护了一个clh队列
+线程拿到锁 进入  达不到 进入clh队列
+公平锁:按照clh队列先来先得公平的获取锁
+非公平锁:无视clh等待队列而直接去抢占锁
+
+
+锁降级是说允许从写入锁降级为读取锁，其实现方式是：
+先获取写入锁，然后获取读取锁，最后释放写入锁。
+但是，不能从读锁升级到写锁。
+降级锁  写锁降级成为读锁
+writerLock().lock();
+...
+readLock().lock();
+
+writerlock().unlock();
+readLock().unlock();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,159 @@
+    #=======MYSQL第三天
+#===========SQl的查询操作 select语句
+增删改单表操作 查询可以单表也可以多表查询
+select 功能最丰富的语句 
+语法格式：select column1,column2 from 表（数据源）[where condition]过滤条件
+
+select *from student ;查询所有
+select id,sname ,age,gender from student;
+select id as '主键',sname as '姓名' ,age as '年龄',gender as '性别'  from student; 
+select *from student where gender='男';
+#=======查询条件的几种分类
+1.等值查询‘=’ 2.模糊查询 like 3.范围查询 >,<,>=,<=,<>,between ,
+in 在。。范围内，通过枚举的方式提供出来的
+#分类的查询可以组合 and(&&) or(||) not(!)
+#举例
+select *from student where id='ST0003'||id='ST0005';
+select *from student where id in('ST0003','ST0005')//枚举的方式
+# 关于null值得数据过滤 null是不等于null的
+#所以对null值的过滤使用is null
+查询null值 select *from student where age is null;
+
+#当使用select语句进行查询时，还可以在select语句中使用算数运行算符
+
+#中等难度的查询操作========
+#每种商品进货耗费资金
+select id,p_name,p_price,p_store,(p_price*p_store)as money from product
+
+#某公司的进销存系统 库存盘点 库存预警 商品过期预警
+#查询过期的商品  如何获取系统当前的日期 数据库函数
+获取当前日期：select curdate()  当前时间：select curtime()
+select curdate()
+#查询过期的商品 
+select *from product where (curdate()-(p_date+long_time))>0//错误 直接加法
+运算会大于30天
+select *from product where (curdate()-adddate(p_date,long_time))>0
+
+#==date_add('1998-01-02',interval 2 month)--day year 可以加天数 月数 年数
+#==adddate('1990-01-02',3) 只能加天数
+#如果可以在数据库中完成的计算，则应该在执行SQL语句时就需要完成。
+#注意：如果在执行SQL时要完成的计算，那么相应的列的数据类型应该是
+#date int float ...数值或日期类型
+#在SQL如果要完成运算操作，同样使用select语句
+select 3+5 as num
+
+#========distinct 去除重复数据 
+select distinct model from resource;
+select distinct role_name,role_cname from role
+
+模糊匹配：
+select *from user where cname like '张%'//名字以张开头的所有名字 通配符
+select *from user where cname like '张_'//名字以张开头的两个字的 占位符
+                                   '_云'
+
+查询条件里需要使用下划线或者百分号，不希望SQL把下划线和百分号当做通配符使用，
+这就需要使用转义字符，MYSQL使用反斜线(\)作为转义字符，如下
+select *from student where stud_name like '\_%'
+===对查询结果进行排序 
+进行排序时不指定排序方式默认升序排序 asc 
+如果进行降序排序 使用 desc 
+select *from product order by p_price desc 降序排列
+select *from product order by p_price asc  升序排列
+
+对两列进行升序排序
+select *from product order by p_price asc,p_store asc
+
+#======以上为简单的查询操作，涉及到多表，子查询，嵌套查询操作========
+
+#=======数据库函数，不是统一的看API
+
+select *from user where char_length(cname)> =2;功能强大
+
+#====加密操作，加密不可逆 
+#账户登录密码 
+
+insert into user（user_id,user_name,user_pass,user_canem）
+values('000012','wangwei',md5('123456'),'王伟')
+查询时 select * from user where user_name='wangwei'and user_pass=md5('123456');
+
+null的函数
+ifnull(exper1,esper2):如果exper1为null，则返回exper2，否则返回exper1
+nullif(exper1,exper2) 如果想等返回null 否则返回expert1
+if(exper1,exper2,exper3)类似于？：三目运算符 如果exper1为true ，不等于0，且不等于null，则返回exper2否则返回exper3
+isnull(exper1)判断exper1是否为null，如果为null作为查询结果返回0
+查询性别有值返回性别 没有值返回未知
+select id,sname,age,ifnull(gender,'未知') gender from student 
+
+select  id,sname,if(age>=16,'成年'，‘未成年’)age from student;
+
+
+#===case函数的第一种使用方式 when 类似 switch case
+select id,sname case gender when 0 then '男'
+when 1 then '女'
+else '无' end as gender from student //可以不写else直接end
+ 写as不然名字是前面的一大长串
+case语法的第二种方式 ，区别 case关键字后面不需要加列或者值
+when可以使用逻辑表达式，而不是枚举值
+select id,sname,case when age>=16 then '成年'
+when age<16 then '未成年' 
+else '老年' end as age  from student； 
+#========组函数（多行函数）
+#1.计算平均值，计算雪糕的平均售价
+select p_name,avg(p_price) as price from product where p_name like '%雪糕%'
+
+#2.count 统计总数，
+//*表示所有的列
+select count(*) 统计总行数
+//没有必要写星花 写主键就列名可以
+select count(id) as total from product;
+#3.取最大值，最小值，查询当前月份销售额最高的是哪个商品
+涉及到子查询,子查询也被称为嵌套查询
+selec  t *from product where p_store=(select max(p_store)from product)
+#4.求和处理，计算当前月，所有商品的总利润
+#对于product商品名，把价格字段当成销售字段来看
+select sum(p_price) from product where p_name like '%雪糕%'
+  
+#需要，按照商品分类进行总利润计算
+对于很多数据库而言，分组计算时有严格的规则--如果查询列表中使用了组函数，或者
+select语句中使用了group by 分组子句，则要求出现在select列表中的字段，
+要么使用组函数包裹起来，要么必须出现在group by 子句中，这条规则很容易理解，
+因为一旦使用了组函数或者使用了group by子句，都将导致多条记录只有一条被输出
+系统无法确定哪一条。
+select sum(p_price),p_type,p_name as price from product group by p_type
+//group by p_type 按照什么分类
+
+where 和 having 
+#1 不能在where 子句中过滤组，where子句仅用于过滤行，过滤组必须使用having子句
+#2.不能在where子句中使用组函数，having子句中可以使用组函数
+但是可以把组函数作为查询后条件在where中使用
+select p_name from product group by p_type order by p_name asc;
+
+可以给数据起一个名称 然后.调用
+select sun(t.p_price) price ,t.p_type,p_name as price from 
+(select p_price,p_type,p_name from product order by p_name asc) t
+group by t.p_type;
+误区：sum函数，组函数，多条记录只返回一条
+
+#嵌套查询，可以先对数据进行过滤，过滤后得到的数据集合，可以看成
+一个临时表，在进行分组时，就是对临时表进行分组计算
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,11 @@
+@RequestMapping("/fileDown.action")
+	public ResponseEntity<byte[]> fileDown(HttpServletRequest request,String name,String fileName) throws IOException{
+		 HttpHeaders headers = new HttpHeaders();
+		 	String filePath = request.getServletContext().getRealPath("/upload/common/"+name+File.separator+fileName);
+	        File file = new File(filePath);
+	        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);    
+	        headers.setContentDispositionFormData("attachment", fileName);    
+	       
+	        return new ResponseEntity<byte[]>(FileUtils.readFileToByteArray(file),    
+	                                              headers, HttpStatus.CREATED); 
+	}

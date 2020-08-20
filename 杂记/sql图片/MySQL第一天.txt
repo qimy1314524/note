@@ -1,0 +1,91 @@
+#MySQL第一天
+#创建数据库命令
+--创建数据库的命令
+create database t1;
+--删除数据库的命令
+drop database t1；
+DML语句：select insert update delete
+DDL语句：create alter（修改） drop turncate（截断）
+关键字不区分大小写 table（表）
+--创建数据表的命令 创建学生表
+create table student(
+    id varchar(35) primary key comment '主键'/* 注释*/,//id是主键唯一的，查询使用，不能重复
+    sname varchar(10) not null,//不允许为空
+    age int,
+    gender char(1) default '男',//默认值为男
+    class_no varchar(20),
+    tel varchar(30),
+    nation varchar(10),
+    card varchar(20),
+    address varchar(100)
+)
+//comment ‘’为注释
+执行命令选中执行
+--创建表的其他几种不常用方式：
+--首先看表的简单查询语句：select
+*表示查询所有的列
+select *from student
+--选择某几列作为查询结果
+select  sname,age,gender, from student
+--更改查询结果的显示列名 as表示显示的列名
+select sname as '姓名'，age as '年龄'from student
+1.以查询结果来创建表 
+creat table student0
+as
+select *from student//创建表和student的数据一样
+select sname,age,gender,nation,adress from students//创建表只和student中这几个数值一样
+--删除表操作
+drop table student；
+--更改表结构为student添加新的列
+alter table student add(
+email varchar(50)
+)
+--2.更改列定义 注意：修改列每次只能对一个列做更改
+--更改某一列存储长度
+alter table student modify class_no varchar(30);
+--3.为student表删除指定的列
+alter table student drop nation;
+--4.重命名列名操作，为student表的tel列名更改名为telephone
+alter table student
+change tel telphone varchar(20);
+--5.对表名的重新定义
+alter table student rename to student1
+
+#======删除表操作：删除表中的数据 
+1.delete删除行的方式，遍历数据文件，查询数据删除，以数据为操作目标
+可以指定数据进行删除，性能不如截断表快，但是功能强大
+ 2.turncate 截断表的方式，以数据文件的存储空间为操作目标
+是对整张表的数据的一次性删除，性能快，功能不如delete
+
+delete from student where sname='张二'//找得到就删除，找不到就不删除 
+ --删除表数据操作
+turnncate table student
+--删除表操作：不仅删除数据，同时删除表结构定义
+ drop table student
+
+not null 非空约束  
+unique 唯一约束,不可以出现重复值，但是可以出现多个null值，在数据库中，null不等于null
+primary key 主键
+foreign key 外键 指定该列的值从属主表中的一条记录，主要用于保证参照的完整性
+check 检查 mysql不支持
+ 
+and相当于&&
+#用于描述其他数据的数据，称为元数据
+
+为数据指定约束有两种时机：
+1.创建表的同时为相应的数据指定约束
+2.创建表后创建，以修改表的方式来增加约束 
+---唯一约束
+alter table student modify email varchar(30)not null;
+取消非空约束 
+alter table student modify email varchar(30) null;
+查询为null select *from student where email is null;
+--======unique  唯一约束,不能出现重复值
+alter table student modify card varchar(30) unique；
+##在MYSQL中当为某一列制定唯一约束时，MYSQL数据库为该列创建相应的索引index
+删除约束：
+alter table student drop index card；
+使用表级约束语法，来创建唯一约束，表级的约束语法还可以同时指定约束名称
+person_card 为约束名
+alter table student add constraint person_card unique (card);
+ 

@@ -1,0 +1,1 @@
+SELECT stu.*,his.* FROM stu JOIN 

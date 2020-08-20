@@ -1,0 +1,29 @@
+@RequestMapping(value="/fileUp.action")
+	public @ResponseBody void fileUp(HttpServletRequest request,HttpServletResponse response,MultipartFile file) throws IOException{
+		//MultipartFile.getContentType()这个属性将得到上传文件的类型,可以根据上传文件的类型动态的传入哪一个文件夹存储
+		//file.getContentType();
+		
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("text/html;charset=utf-8");
+		String realPath = request.getServletContext().getRealPath("/upload");
+		HttpSession session = request.getSession();
+		User user = (User) session.getAttribute("user");
+		String username = user.getUsername();
+		String name = file.getOriginalFilename();
+		System.out.println(name);
+		File creatPath=new File(realPath+File.separator+username);
+		if(!creatPath.exists()){
+			creatPath.mkdir();	
+		}
+		File filePath=new File(realPath+File.separator+username+File.separator+name);
+		try {
+			file.transferTo(filePath);
+			response.getWriter().write("上传成功");
+			response.addHeader("refresh","2;url="+request.getContextPath()+"/fileUpPage.action");
+		} catch (IllegalStateException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			response.getWriter().write("上传失败");
+			response.addHeader("refresh","2;url="+request.getContextPath()+"/fileUpPage.action");
+		}
+	}

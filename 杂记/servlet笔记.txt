@@ -1,0 +1,235 @@
+servlet笔记
+页面的/代表虚拟主机
+
+javaweb后台有三个域对象application域(servletContext) request域 session域
+javaweb前台有四个域对象上面三个加上page域
+请求域范围:一次请求直到响应   
+
+
+request转发请求时,请求路径默认为WebContent代表本web应用
+耗时小
+不写/代表本次请求的资源的路径的相对路径就是往回退一级
+请求转发是服务器内部的行为 在浏览器上观察不到地址栏的变化
+request.getRequestDispatcher("/success.html").forward(request,response);
+也可以转发servlet的路径request.getRequestDispatcher("/ds").forward(request,response);
+请求对象是个域对象 作用范围:是一次请求到响应之前 请求可以转发多次 转发多次里面都是这一个请求
+在转发之前可以向请求域中设置数据req.setAttribute();
+
+
+
+响应对象的重定向 客户端行为可以观察到地址栏的变化
+重定向是把一个路径响应给用户浏览器,然后用户重新请求这个路径 所以是两次请求
+重定向路径开头的/代表虚拟主机 因为这个路径是给用户浏览器使用的
+可以重定向到本应用 其他应用 其他主机 网络上的任何资源都可以
+一次重定向 两次请求 两次响应
+耗时多
+重定向也可以响应动态资源回去 不能使用请求来传递数据 不过可以?k=v的形式传递数据
+request.getContextpath();得到项目名称例如:/ssm
+这里的/代表主机response.sendRedirect(req.getContextPath+"/success.html");
+response.sendRedirect("http:www.baidu.con");可以转到百度页面因为是客户端浏览器行为
+这里没有写/
+
+
+servlet方法里可以使用return结束方法
+
+
+响应设置头信息
+response.setContentType("text/html;charset=utf-8");
+response.setHead("refresh","3;url="+request.getContextPath()+"/img/1.jpg");
+resp.getwriter.write("3秒后重定向到美女图片");
+
+
+session默认30分钟失效
+session.setMaxinactiveInterval( int second);设置session的最大不响应时间
+session.invalidate();直接杀死session
+
+session的钝化和活化 work空间里项目下正常关闭的时候会session里面的数据会被保存到.ser文件 (必须实现了序列化接口)当在30分钟内正常启动会活化
+session里的会话状态会被唤醒
+
+
+
+
+jsp:
+jsp是java server page 用java生成html的技术
+jsp本质是一个servlet 通过response对象获取writer写html标签
+jsp七大组成部分:
+最关键的是html\jsp编译指令\jsp注释\jsp脚本\jsp声明\jsp表达式\jsp动作指令
+我们会用el\jstl标签代替除html以外的其他组成部分
+jsp运行过程:第一次运行的时候容器把它翻译成java 并编译为classwenjian通过输出流将html写出
+tomcat编译jsp的时候在work目录下进行
+
+jsp脚本 <%  %>里面写java代码 不合乎oop的想法  翻译成java时会出现在service里
+jsp表达式<%= %>  输出命令 会打印里面不能写分号就是调用输出流进行输出
+jsp注释翻译成java时丢弃
+jsp编译指令 @page @include <% @include file="jsp2.jsp"%> 包含的jsp2文件没有被翻译成java jsp2的内容被包含到当前这个jsp里了
+jsp注释<%--  --%>
+jsp动作指令 <jsp:..></jsp:...> 例如:<jsp:include page="jsp2.jsp"></jsp:include>
+这个动作指令同时会把jsp2进行编译
+jsp声明 <%! %>在里面可以写java代码 声明成员变量和方法 这里写的会出现在service方法外面 
+
+
+
+配置jsp错误页面  错误页面要在page指令里 isErrorPage="true" 
+可以在jsp页面里加入jsp表达式<%=exception.getMessage()%>
+配置局部错误页面
+在普通的jsp页面在page指令里加入 errorPage="error.jsp" 就是出错了以后会跳到error.jsp这个jsp错误页面
+配置全局错误页面
+在web.xml里面配置 
+<error-page>
+<error-code>404</error-code>//404是找不到资源没有异常 不需要写输出错误信息
+<location>/error404.jsp</location>
+<error-page>
+<error-page>
+<error-code>500</error-code>//500是服务器内部错误所以需要配置错误信息
+需要使用exception内置对象进行错误输出
+但是控制台的异常依然会报错 但是程序不会停止
+<location>/error500.jsp</location>
+<error-page>
+
+
+jsp的九大内置对象:
+page/config/application/request/response/session/out/exception/pageContext
+page是转成java对象之后的this
+config是servletConfig
+pageCotext叫做页面上下文环境tomcat生成的  可以获取其他8大对象还可以在四大作用域里面搜寻数据
+
+
+四大作用域  pageContext(页面域,当前页面)  request session application
+
+el表达式11个内置对象
+pageScope requestScope sessionScope applicationScope 代表各个作用域里值的集合
+
+pageContext  param(请求中的参数)  paramValues  header headerValues cookie  initParam(servletContext里的初始化参数)
+直接${user}从小到大去四大作用域里查找 pageContext request session servletContext
+
+el可以直接使用不需要导包
+jstl需要导包 <% taglib uri="" prefix="">常用的是core还有function
+
+遍历map ${user.key}   ${user.value.username}
+
+jstl的if语句
+<c:if test="">
+</c:if>
+
+多重if语句
+<c:choose>
+<c:when test="${us.username='admin'}"> 这里不能直接写admin 要加单引号负责会当成域中的对象去域中寻找
+在el表达式中name 和 'name'的区别 name代表一个对象 'name'代表一个字符串
+</c:when>
+<c:when test="">
+</c:when>
+<c:otherwise>
+</c:otherwise>
+</c:choose>
+
+
+function方法库fn标签用在el表达式里 代表调用方法 举例
+<c:if test="${fn:..}"></c:if>
+
+filter 敏感词汇过滤 读取wenContext中的文件必须使用真实路径
+装饰类 HttpServletRequestWrapper  重写getParamter()方法
+
+
+
+cookie
+如何获取 ${cookie.yhm.value} ${cookie.mm.value}
+在后台如何设置cookie 
+Cookie yhm=new Cookie("yhm",userName);
+Cookie mm=new Cookie("mm",password);
+yhm.setMaxAge(60*60*24*10);以秒为单位
+mm.setMaxAge(60*60*24*10);
+然后通过response.addCookie(yhm); response.addCookie(mm);
+
+
+上传文件 
+上传文件时必须使用post请求 form表单里要加入一项属性enctype="multipart/form-data"
+
+serlvet里post请求
+DiskFileItemFactory fac=new DiskFileItemFactory();
+	ServletFileUpload sfu=new ServletFileUpload(fac);
+	sfu.setHeaderEncoding("UTF-8");
+	sfu.setFileSizeMax(1024*1024*20);//字节为单位
+	sfu.setSizeMax(1024*1024*100);
+	try {
+		List<FileItem> parseRequest = sfu.parseRequest(request);
+		for (FileItem fileItem : parseRequest) {
+			if(fileItem.isFormField()){
+				System.out.println(fileItem.getFieldName());
+				System.out.println(fileItem.getString("utf-8"));
+			}else{
+				String filename = fileItem.getName();
+				String dirPath = this.getServletContext().getRealPath("/WEB-INF/upload");
+				String uuid=UUID.randomUUID().toString().replace("-","");
+				String newFilePath=dirPath+File.separator+uuid+filename;
+				InputStream is=fileItem.getInputStream();
+				OutputStream os=new  FileOutputStream(newFilePath);
+				IOUtils.copy(is, os);
+				IOUtils.closeQuietly(is);
+				IOUtils.closeQuietly(os);
+			}
+		}
+	response.getWriter().write("收到请求");	
+	} catch (Exception e) {
+		// TODO: handle exception
+		e.printStackTrace();
+	}
+
+
+文件下载 
+文件下载需要的头
+fileName = URLEncoder.encode(fileName,"UTF-8");
+response.addHeader("Content-Disposition","attchment;filename="+fileName);
+response.addHeader("Content-Length",fn.length()+"");
+OutputStream os = response.getOutputStream();
+InputStream is=new FileInputStream(fn);
+IOUtils.copy(is, os);
+IOUtils.closeQuietly(os);
+IOUtils.closeQuietly(is);
+
+
+
+
+
+上传文件:
+jsp:
+<form action="UploadServlet" method="post" enctype="multipart/form-data">
+Photo file: <input type="file" name="photo" />
+<input type="submit" value="Upload" />
+
+
+</form>
+servlet;
+// 可以用 request.getPart()方法获得名为 photo 的上传附件
+// 也可以用 request.getParts()获得所有上传附件（多文件上传）
+// 然后通过循环分别处理每一个上传的文件
+Part part = request.getPart("photo");
+if (part != null && part.getSubmittedFileName().length() > 0) {
+// 用 ServletContext 对象的 getRealPath()方法获得上传文件夹的绝对路径
+String savePath = request.getServletContext().getRealPath("/upload");
+// Servlet 3.1 规范中可以用 Part 对象的 getSubmittedFileName()方法获得上传的文件名
+// 更好的做法是为上传的文件进行重命名（避免同名文件的相互覆盖）
+part.write(savePath + "/" + part.getSubmittedFileName());
+request.setAttribute("hint", "Upload Successfully!");
+} else {
+request.setAttribute("hint", "Upload failed!");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

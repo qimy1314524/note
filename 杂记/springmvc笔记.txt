@@ -1,0 +1,190 @@
+springMVC笔记:
+
+web.xml的配置
+首先需要配置一个servlet即springmvc给我们提供的前端控制器
+<servlet>
+<servlet-name>
+<servlet-class>
+<init-param>
+<param-name> contextConfigLocation</>springmvc给我们提供的前端控制器需要依赖一个
+叫做contextConfigLocation初始配置  即我们配置的那些xml文件 classpath:代表从根目录进行加载
+如果不配置会按照默认记载 /WEB-INF/DispatcherServlet-servlet.xml这个xml文件 如果没有会报错
+<param-value>classpath:spring*.xml</>
+</init-param>
+
+</servlet>
+<servlet-mapping>
+<servlet-name>
+<url-pattern>*.action</url-pattern> 我们的前端控制器只负责处理业务逻辑,对于静态资源不需要进行处理
+所以我们需要自定义一种类型来让控制器进行识别
+</servlet-mapping>
+
+配置路径的时候classPath:  代表从类的根目录下进行加载
+
+在spring-mvc.xml中配置的
+使用xml配置的方式配置处理器映射器
+1.这个是把配置的bean的name属性当做url的映射器 
+<bean class="org.springframework.web.servlet.handler.BeanUrlHandlerMapping">
+2.这个可以集中配置所有的url
+<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMappinh">
+<property name="mappings">
+<prop key="要配置的url(*/usermodel/list.action)">配置的bean的id</prop>
+<prop key="要配置的url(*/usermodel/list1.action)">配置的bean的id</prop>
+<prop key="要配置的url(*/usermodel/list2.action)">配置的bean的id</prop>
+</property>
+</bean>
+使用xml配置的方式配置处理器适配器
+1.第一种
+<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"/>
+2.第二种
+<bean class="org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter">
+
+适配器和映射器之间没有关联关系 相互独立的 主要是看你写的service是属于什么类型 适配器支持哪种类型
+
+
+配置注解的映射器适配器
+可以配置bean的方式也可以用下面这个方式
+<mvc:annotation-driver>
+
+
+如何写控制层
+举例
+@Controller
+public class ItemController{
+@Autowired
+private ItemService itemService=null;
+
+@RequestMapping("*/query_item_list.action")这里的作用是配置url
+public * queryItemList(..){
+//一般返回值是String 可以代表返回一个视图 也可以重定向 和转发
+}
+}
+
+加载这个handler可以使用spring的批量扫描的方式
+<context:component-scan base-package="com.langsin.controller">
+
+如何写service层
+@Service("LoginService")
+public class LoginServiceImpl implements LoginService{
+@Autowired
+private UserMapper userMapper=null;这里的userMapper是通过spring给我们提供的mapper扫描器提供的
+
+}
+
+
+通过String进行重定向 return "redirct:user_list.action"
+
+窄化请求:
+在类上注解 @RequestMapping("/usermodel") 
+请求限定:
+在注解上限定请求方式@RequestMapping(value="/user_login.action",method={RequestMethod.POST})
+
+springMvc对json格式数据的支持
+需要用到注解:@RequestBody此注解可以将json格式的字符串转换成相应的java对象
+如果需要输出json格式的字符串需要用到注解@ResponseBody此注解可以将java对象转换成json串输出
+需要用到jackson包
+在前端用ajax的时候记得加上ContextType:"application/json;charset=utf-8"
+方法如何写
+@RequestMapping("query_user.action")
+public @ResponseBody Map<String,Boolean>queryUserByName(@RequestBody User user){
+user=UserSeriver.queryByUserName(user);
+Map<String,Boolean>map=new HashMap<>();
+if(user!=null){
+map.put("exist",new Boolean(true));
+}
+return map;
+}
+
+如果前端传过来的数据不是json可以不用写@RequestBody这个注解
+也不需要写contextType
+只需要写@responseBody这个注解就可以
+
+mvc配置静态资源的处理 配置在spring.xml中
+<mvc:resources location="/jquery/" mapping="/jquery/**">
+<mvc:resources location="/image/" mapping="/image/**">
+试一下可不可以映射WEB-INF下的静态资源
+
+参数绑定 list map 必须封装成一个bean
+那么前端页面中的name属性如何写呢 因为参数绑定名称必须一致
+name="map['cname']" 这里的意思就是绑定到bean中的参数名称为map的key为cname
+
+List参数绑定 dirList[${status.index}].id list绑定要用索引
+
+数组绑定 名称一样即可
+
+
+参数校验 配置springmvc.xml文件 
+配置一个errorMessage.properties文件
+在需要的bean中 用注解
+比如@NotEmpty(message="{user.userName.isempty}") message里的属性是我们配置的properties里面的key值
+还需要在传递过来的User参数 用@Validated 修饰 并且加一个参数 BindingResult result
+if(result.hasErrors){//是否校验通过
+List<ObjectError> error=result.getAllErrors();//存储的错误信息
+可以用for循环遍历出来 然后加到request集合中然后返回页面
+}else{
+
+}
+
+异常处理
+
+
+
+文件上传 参数绑定类型 MultipartFile uploadFile
+如何写出去 uploadFile.transferTo()
+
+
+拦截器配置  看文档 
+需要继承HandlerInterceptor
+例如 
+if(request.getRequestURI().contains("user_login.action"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

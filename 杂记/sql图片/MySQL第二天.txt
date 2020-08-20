@@ -1,0 +1,109 @@
+#==========主键约束
+1.每个表中主键只能有一个，但是主键约束可以由多个列组合而成 单列：主键+ primary key
+
+列级的约束语法：直接在当前列的后面加约束语法
+#1.使用列级约束语法创建主键：
+create table dict（
+id int auto_increment primary key,dict_cod varchar(30)not null,
+dict_name varchar(30)
+）
+#2.使用表级的约束语法，创建约束
+表级的约束语法：列完成后，单独的再添加一个约束语法
+表级实例：create table dict（
+id int auto_increment not null，dict_cod varchar（50） not null，dict_name varchar（50） null,
+constraint dict_pk primary key(id,dict_cod,dict_name)
+）//约束名无法指定
+#3.删除指定表的主键约束：(如果值是auto_sincrement的会出现错误)
+alter table dict drop primary key;
+#4.表创建结束后，单独为表指定主键约束，add添加，modify修改
+add只能使用表级的约束语法 modify只能使用列级的约束语法
+alter table dict modify id varchar(40)primary key;
+
+外键约束：用于保证一个或两个数据表的参照完整性 可以一个表的两个字段/ 两个表的两个字段
+
+#数据不完整 （信息不正确）
+#========外键约束
+alter table student add foreign key(teacher_id)
+references/*(参照关键字)*/ teacher (teacher_id)
+#删除外键约束;
+alter table student drop foreign key student_ibfk_1;
+#创建外键约束是，MYSQL自动为该列创建索引，删除时只是删除了外键约束，
+而自动生成的索引并没有相应的删除
+#删除索引：
+alter table student drop index teacher_id;
+再次创建外键约束 表级语法
+alter table student add constraint teacher_student_fk 
+foreign key student(teacher_id) reference (teacher_id) 
+
+#删除外键约束时，如果创建外键约束时，没有指定名称，则需要按照默认
+外键约束名称去删除，默认外键约束的定义规则为：tablename_ibfk_n,如果指定了
+外键名称删除，最后在执行索引的删除 
+#主表：被参照的表称为主表，参照的表称为从表
+
+#删除先删除从表的数据 
+delete from student where teacher_id='T0001';//从表
+delete from teacher where teacher_id='T0001';//主表
+
+级联删除：删除主表是从表记录随之删除 在外键约束后添加on delete casecade 
+或者添加 on delete set null 第一种 删除主表时从表记录随之级联删除
+第二种：参照主表的从表记录外键设为Null 
+#1.关联数据直接删除 on delete casecade
+#2.关联清空操作 on delete set null
+alter table student add constraint teacher_student_fk
+foreign key(teacher_id)references teacher(teacher_id) on delete casecade 
+#直接删除主表记录：
+delete from teacher where teacher_id='T0002'
+
+#=======索引：加速表的数据的查询
+索引创建两种方式：
+1.自动：当在表上定义主键约束、唯一约束、外键约束时系统会为该列自动创建对应的索引
+2.手动：用户可以通过create index 语句来创建索引 delete index 删除索引
+#=====手动创建索引====
+create index sanme_index on student(sname)
+#=====删除索引=========
+drop index sname_index on student
+
+
+#===========DML(数据库操作语句)=======
+
+#=======数据库表的数据插入操作 insert============
+#1.插入全部的数据
+insert into student values('ST0004','张丽'，'22','女'，null,'136XXXXXXXX','苗族'，
+‘371202199808102632’,null,null,null);
+#2.对指定的列进行插入数据操作
+insert into student(id,sname,telephone,card) values('ST0005','王强','15632456987','371201255645646')
+
+#备份表：防止数据丢失  查询备份表直接插入：
+#1.如果两个表的结构完全一样
+insert into student (select *from stud where)  小括号优先被查询
+#sql 语句，子查询
+#2.不完全一样,按列插入
+  insert into student(...,...)(select column1,conlumn2 from stu);
+
+#=======数据库表的数据的更新操作 update==
+
+不加过滤条件，全部设置为E：update stud set class_no='E'
+加过虑条件：update stud set class_no='E' where stud_id>23 and stud_id<27
+>= <= <>不等于
+update stud set class_no='E' where stud_id between 23 and 27 
+update stud set class_no='E' where stud_id <>23 and stud_id<>27
+
+delete from stud;#整表的删除，效率慢
+truncate stud #截断表
+
+#进行有过滤条件的删除
+delete from stud where stud_sname like '张%' //like模糊匹配 张开头
+
+
+
+
+
+
+
+
+
+
+
+
+
+
